@@ -29,7 +29,7 @@ class PanSprayController:
         # Pump configuration
         self.spray_duration_sec = self.pump_cfg.get("default_spray_time_sec", 1.5)
         self.cooldown_sec = self.pump_cfg.get("cooldown_sec", 3.0)
-        self.pump_enabled = self.pump_cfg.get("enabled", true if "enabled" not in self.pump_cfg else self.pump_cfg["enabled"])
+        self.pump_enabled = self.pump_cfg.get("enabled", True)
 
         # Current state
         self.current_angle = self.home_angle
