@@ -1,0 +1,16 @@
+# Agriculture Rover - Autonomous Navigation & Leaf Disease Spraying
+# Core Dependencies
+
+# Computer Vision & Deep Learning
+opencv-python>=4.8.0.76
+ultralytics>=8.0.196
+numpy>=1.23.0,<2.0.0
+Pillow>=9.5.0
+
+# Hardware Communication & Utilities
+pyserial>=3.5
+pyyaml>=6.0.1
+colorama>=0.4.6
+
+# Optional Testing & Code Quality
+pytest>=7.4.0

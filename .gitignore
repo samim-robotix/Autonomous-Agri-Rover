@@ -1,0 +1,28 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# YOLO weights & training runs
+runs/
+*.pt
+!models/yolov8n_leaf_disease.pt
+
+# IDEs
+.vscode/
+.idea/
+
+# OS artifacts
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Snapshots and captures
+snapshot_*.jpg
+*.log

@@ -1,0 +1,98 @@
+# ==============================================================================
+# Agriculture Rover - Central Configuration
+# 6-Wheel Rocker-Bogie Autonomous Vision Navigation & Targeted Spraying
+# ==============================================================================
+
+# Hardware Communication (Arduino / ESP32 via USB Serial)
+serial:
+  port: "COM3"             # Change to "/dev/ttyUSB0" or "/dev/ttyACM0" on Raspberry Pi
+  baud_rate: 115200
+  timeout_seconds: 1.0
+  reconnect_delay_seconds: 2.0
+  auto_detect: true        # Automatically detects Arduino/ESP32 serial device if port not found
+
+# Motor Drive Parameters (6-Wheel Differential Drive)
+motor:
+  pwm_min: 60              # Minimum PWM value to overcome motor static friction
+  cruise_speed_pwm: 160    # Default cruise speed (0-255)
+  turn_speed_pwm: 140      # Pivot/Turn speed (0-255)
+  slow_speed_pwm: 100      # Creep / obstacle approach speed
+  max_speed_pwm: 255       # Top speed limit
+  turn_duration_sec: 0.8   # Duration of obstacle avoidance pivot maneuver
+  reverse_duration_sec: 1.0# Duration of escape reverse maneuver
+
+# Pan-Tilt / Scanning Servo (Mounted at top with camera/nozzle)
+servo_scanner:
+  pin: 9                   # Arduino PWM pin connected to pan servo signal
+  min_angle: 0             # Scan range start (degrees)
+  max_angle: 180           # Scan range end (degrees)
+  home_angle: 90           # Center straight ahead
+  step_degrees: 5          # Angle increment per scan step
+  step_delay_seconds: 0.04 # Delay between scan steps for smooth motion
+  camera_fov_horizontal: 60.0 # Approximate horizontal Field of View of camera in degrees
+
+# Spraying System (12V Diaphragm Pump via Relay)
+spray_pump:
+  relay_pin: 8             # Arduino digital pin controlling relay module
+  relay_active_low: true   # Typical Arduino relay modules are Active LOW (LOW=ON, HIGH=OFF)
+  default_spray_time_sec: 1.5 # Duration of spray trigger when disease detected
+  cooldown_sec: 3.0        # Mandatory delay between consecutive sprays to prevent oversaturating
+  enabled: true            # Safety master switch for pump
+
+# Ultrasonic Safety Distance Sensor (HC-SR04 on Arduino)
+ultrasonic:
+  trig_pin: 12
+  echo_pin: 11
+  emergency_stop_cm: 25.0  # Hardware-level emergency stop threshold
+  slowdown_distance_cm: 45.0 # Slowdown threshold
+  max_valid_distance_cm: 300.0
+
+# Computer Vision & Camera Configuration
+vision:
+  camera_source: 0         # 0 for default USB webcam, or path to video file / CSI index
+  frame_width: 640
+  frame_height: 480
+  fps: 30
+  
+  # Monocular Vision Obstacle Avoidance
+  obstacle_detection:
+    ground_roi_start_ratio: 0.45  # Process bottom 55% of image (rover path plane)
+    zones: 3                      # Left, Center, Right zones
+    zone_split_ratios: [0.33, 0.66] # Boundary splits between zones
+    obstacle_density_threshold: 0.22 # If >22% of zone contains obstacle pixels, mark blocked
+    canny_low: 50
+    canny_high: 150
+    morphology_kernel_size: 5
+    # Color thresholding for outdoor agricultural ground (HSV)
+    # Soil / crop path segmentation
+    adaptive_threshold_block_size: 31
+    adaptive_threshold_c: 5
+
+  # Leaf Disease Detection (YOLOv8)
+  leaf_disease:
+    model_path: "models/yolov8n_leaf_disease.pt"
+    confidence_threshold: 0.45
+    iou_threshold: 0.40
+    device: "cpu"                 # Use "cpu" for Raspberry Pi / laptop or "cuda" / 0 for Jetson/GPU
+    spray_targeting_margin_px: 50 # Pixel tolerance for nozzle alignment
+    target_classes:
+      - "blight"
+      - "rust"
+      - "leaf_spot"
+      - "powdery_mildew"
+      - "scab"
+      - "yellow_virus"
+      - "infected_leaf"
+
+# Navigation & Mission Strategy
+navigation:
+  obstacle_check_interval_sec: 0.05
+  search_turn_direction: "right"  # Default turning preference if center blocked
+  max_recovery_attempts: 3        # Number of reverse-turn attempts if trapped
+
+# Mission Controller Settings
+mission:
+  autonomous_mode: true
+  enable_scanning_while_moving: false # Stop rover before pan sweep to avoid motion blur and accurate spray
+  pause_duration_for_scan_sec: 0.5    # Pause before triggering scan
+  debug_display: true                 # Open OpenCV visual monitoring window with overlays
